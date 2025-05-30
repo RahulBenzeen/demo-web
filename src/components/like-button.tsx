@@ -37,7 +37,6 @@ export function LikeButton({
   // Check if current user has liked this post
   const isLiked = currentUser ? likedBy.includes(currentUser.uid) : false
 
-  console.log(isLiked, currentUser?.uid,authorId  )
   const handleLike = async () => {
     if (!currentUser) {
       toast({
@@ -66,11 +65,14 @@ export function LikeButton({
           `${currentUser.displayName} liked your post: ${postTitle || "Untitled"}`
         );
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to toggle like:", error)
       toast({
         title: "Error",
-        description: error?.message || "Failed to like post. Please try again.",
+        description:
+          error && typeof error === "object" && "message" in error
+            ? (error as { message?: string }).message
+            : "Failed to like post. Please try again.",
         variant: "destructive",
       })
     }
