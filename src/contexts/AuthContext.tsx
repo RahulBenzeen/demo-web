@@ -20,8 +20,8 @@ interface UserProfile {
   email: string | null;
   photoURL: string | null;
   bio?: string;
-  createdAt?: Date | FieldValue;
-  updatedAt?: Date | FieldValue;
+  createdAt?:any;
+  updatedAt?:any;
   role?: "user" | "admin";
   lastLogin?: string | FieldValue;
 }
