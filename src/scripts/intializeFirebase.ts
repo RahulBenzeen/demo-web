@@ -3,7 +3,7 @@ import { db } from "@/lib/firebase"
 
 // Initialize categories collection
 export const initializeCategories = async () => {
-  console.log("iam called categories ")
+
   const categories = [
     {
       name: "Technology",

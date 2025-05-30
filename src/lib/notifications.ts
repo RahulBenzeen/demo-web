@@ -69,7 +69,6 @@ const saveTokenToFirestore = async (token: string): Promise<void> => {
 // Handle foreground messages
 export const setupForegroundHandler = (): void => {
   onMessage(messaging, (payload: MessagePayload) => {
-    console.log("Foreground message:", payload);
 
     if (payload.notification) {
       new Notification(payload.notification.title || "New Message", {
@@ -87,11 +86,6 @@ export const sendNotificationToUser = async (
   body: string
 ): Promise<void> => {
   try {
-    console.log({
-      userId,
-      title,
-      body
-    })
     // Create notification document
     await addDoc(collection(db, "notifications"), {
       userId,

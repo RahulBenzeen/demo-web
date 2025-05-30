@@ -34,7 +34,6 @@ export default function CreatePost() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const{data: Categories} = useGetCategoriesQuery();
-  console.log({Categories})
 
   const navigate = useNavigate()
   const { currentUser, userProfile } = useAuth()

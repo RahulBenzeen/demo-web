@@ -12,16 +12,18 @@ import {
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db, provider } from "@/lib/firebase";
 
+import type { FieldValue } from "firebase/firestore";
+
 interface UserProfile {
   uid: string;
   displayName: string | null;
   email: string | null;
   photoURL: string | null;
   bio?: string;
-  createdAt?: any;
-  updatedAt?: any;
+  createdAt?: Date | FieldValue;
+  updatedAt?: Date | FieldValue;
   role?: "user" | "admin";
-  lastLogin?: any;
+  lastLogin?: string | FieldValue;
 }
 
 interface AuthContextType {
@@ -48,7 +50,7 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  console.log("user 0")
+
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);

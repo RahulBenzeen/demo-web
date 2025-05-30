@@ -60,6 +60,23 @@ export interface PostsResponse {
   lastDocId: string | null;
 }
 
+// Add to your existing interfaces
+export interface User {
+  uid: string;
+  displayName: string;
+  email: string;
+  photoURL?: string;
+  bio?: string;
+  location?: string;
+  website?: string;
+  username?: string;
+  createdAt: string;
+  postCount: number;
+  followerCount: number;
+  followingCount: number;
+}
+
+
 function serializeTimestamps(obj: Record<string, any>): Record<string, any> {
   const copy = { ...obj };
   if (copy.createdAt?.toDate) {
@@ -97,7 +114,7 @@ export const postsAPI = createApi({
     unknown,
     unknown
   >,
-  tagTypes: ["Post", "Category", "Comment", "SavedPost"],
+  tagTypes: ["Post", "Category", "Comment", "SavedPost", "User"],
   endpoints: (builder) => ({
     getPosts: builder.query<
       PostsResponse,
@@ -514,7 +531,29 @@ export const postsAPI = createApi({
         { type: "Post", id: "LIST" },
       ],
     }),
+    getUserById: builder.query<User, string>({
+  query: (userId) => ({
+    url: `users/${userId}`,
+    method: "GET",
   }),
+  providesTags: (result, error, userId) => [{ type: 'User', id: userId }],
+  transformResponse: (response: any) => ({
+    uid: response.uid,
+    displayName: response.displayName,
+    email: response.email,
+    photoURL: response.photoURL,
+    bio: response.bio || '',
+    location: response.location || '',
+    website: response.website || '',
+    username: response.username || '',
+    createdAt: response.createdAt?.toDate?.().toISOString?.() || new Date().toISOString(),
+    postCount: response.postCount || 0,
+    followerCount: response.followerCount || 0,
+    followingCount: response.followingCount || 0,
+  }),
+}),
+  }),
+  
 });
 
 export const {
@@ -538,4 +577,5 @@ export const {
   useSavePostMutation,
   useUnsavePostMutation,
   useGetSavedPostsQuery,
+  useGetUserByIdQuery
 } = postsAPI;

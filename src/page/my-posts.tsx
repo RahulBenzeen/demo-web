@@ -58,7 +58,7 @@ export default function MyPosts() {
   const [deletePost, { isLoading: isDeleting }] = useDeletePostMutation()
 
   const posts = postsResponse?.posts || []
- console.log({posts})
+
   // Filter and sort posts
   const filteredPosts = posts
     .filter((post) => {

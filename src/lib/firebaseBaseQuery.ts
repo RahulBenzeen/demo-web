@@ -45,18 +45,66 @@ export const firebaseBaseQuery =
         throw new Error("Authentication required")
       }
 
-      // Check if post is saved by user
-      if (url.startsWith("users/") && url.includes("/savedPosts/") && url.includes("/check")) {
+      // ====================== USER PROFILE HANDLER ====================== //
+      if (url.startsWith("users/") && method === "GET") {
         const parts = url.split("/")
         const userId = parts[1]
-        const postId = parts[3]
-
-        if (method === "GET") {
+        
+        // Handle saved post check
+        if (parts.length > 3 && parts[2] === "savedPosts" && parts[4] === "check") {
+          const postId = parts[3]
           const savedPostRef = doc(db, "users", userId, "savedPosts", postId)
           const savedPostSnap = await getDoc(savedPostRef)
           return { data: { isSaved: savedPostSnap.exists() } }
         }
+        // Handle saved posts list
+        else if (parts.length === 3 && parts[2] === "savedPosts") {
+          const savedPostsRef = collection(db, "users", userId, "savedPosts")
+          const snapshot = await getDocs(savedPostsRef)
+          const posts = await Promise.all(
+            snapshot.docs.map(async (doc) => {
+              const postRef = doc.data().post
+              const postSnap = await getDoc(postRef)
+              const postData = postSnap.data() || {}
+              return {
+                ...postData,
+                id: postSnap.id,
+                savedAt: doc.data().savedAt?.toDate?.().toISOString(),
+              }
+            }),
+          )
+          return { data: posts }
+        }
+        // Handle user profile fetch
+        else if (parts.length === 2) {
+          const userRef = doc(db, "users", userId)
+          const userSnap = await getDoc(userRef)
+          
+          if (!userSnap.exists()) {
+            throw new Error("User not found")
+          }
+          
+          const userData = userSnap.data()
+          
+          return {
+            data: {
+              uid: userSnap.id,
+              displayName: userData.displayName || "",
+              email: userData.email || "",
+              photoURL: userData.photoURL || null,
+              bio: userData.bio || "",
+              location: userData.location || "",
+              website: userData.website || "",
+              username: userData.username || "",
+              createdAt: userData.createdAt?.toDate?.().toISOString?.() || new Date().toISOString(),
+              postCount: userData.postCount || 0,
+              followerCount: userData.followerCount || 0,
+              followingCount: userData.followingCount || 0,
+            }
+          };
+        }
       }
+      // ====================== END USER PROFILE HANDLER ====================== //
 
       // Get all posts
       if (url === "posts") {
@@ -102,23 +150,6 @@ export const firebaseBaseQuery =
         const userId = parts[1]
         const postId = parts[3]
         const savedPostsRef = collection(db, "users", userId, "savedPosts")
-
-        if (method === "GET") {
-          const snapshot = await getDocs(savedPostsRef)
-          const posts = await Promise.all(
-            snapshot.docs.map(async (doc) => {
-              const postRef = doc.data().post
-              const postSnap = await getDoc(postRef)
-              const postData = postSnap.data() || {}
-              return {
-                ...postData,
-                id: postSnap.id,
-                savedAt: doc.data().savedAt?.toDate?.().toISOString(),
-              }
-            }),
-          )
-          return { data: posts }
-        }
 
         if (method === "POST") {
           const postRef = doc(db, "posts", postId)
@@ -372,7 +403,6 @@ export const firebaseBaseQuery =
             id: doc.id,
             ...doc.data(),
           }))
-          // console.log({data})
           return { data }
         }
 

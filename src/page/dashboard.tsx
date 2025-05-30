@@ -562,7 +562,7 @@ export default function AdminDashboard() {
                   <div className="flex-1 min-w-0">
                     <h4 className="font-medium truncate">{post.title}</h4>
                     <p className="text-sm text-muted-foreground">
-                      {categories.find((c) => c.id === post.category)?.name || "Uncategorized"}
+                      {categories.find((c) => c.name === post.category)?.name || "Uncategorized"}
                     </p>
                   </div>
                   <div className="flex items-center space-x-4 text-sm text-muted-foreground">

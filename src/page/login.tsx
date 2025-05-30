@@ -23,8 +23,11 @@ export default function SignIn() {
 
   const navigate = useNavigate()
   const { toast } = useToast()
-  const { login, googleLogin } = useAuth()
+  const { currentUser, login, googleLogin } = useAuth()
 
+  if (currentUser) {
+    navigate('/')
+  }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
