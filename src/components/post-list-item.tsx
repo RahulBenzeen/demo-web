@@ -78,7 +78,7 @@ export function PostListItem({ post, className, onClick }: PostListItemProps) {
               postId={post.id}
               likes={post.likes || 0}
               likedBy={post.likedBy || []}
-              author={post.authorId}
+              authorId={post.authorId}
               variant="ghost"
               size="icon"
               className="h-8 w-8 rounded-full"

@@ -59,7 +59,7 @@ export default function SignUp() {
 
     setIsLoading(true)
     try {
-      const user = await signup(email, password, name)
+      await signup(email, password, name)
       toast({
         title: "Account created",
         description: `Welcome, ${name}!`,

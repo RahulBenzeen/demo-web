@@ -30,9 +30,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/components/ui/use-toast"
-import { useGetPostsQuery, useGetCategoriesQuery, useDeletePostMutation, useGetCommentsByPostIdQuery } from "@/store/postApi"
+import { useGetPostsQuery, useGetCategoriesQuery, useDeletePostMutation, } from "@/store/postApi"
 import { format, parseISO, subDays, isAfter } from "date-fns"
 import { useAuth } from "@/contexts/AuthContext"
+import { Timestamp } from "firebase/firestore"
 
 interface DashboardStats {
   totalPosts: number
@@ -53,10 +54,10 @@ export default function AdminDashboard() {
   const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d">("30d")
   const [searchTerm, setSearchTerm] = useState("")
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
-  const [statusFilter, setStatusFilter] = useState<string>("all")
+  // const [statusFilter, setStatusFilter] = useState<string>("all")
   const [sortBy, setSortBy] = useState<"date" | "views" | "likes" | "comments">("date")
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
-   
+  const [sortOrder] = useState<"asc" | "desc">("desc")
+
   // Fetch data using existing API hooks
   const {
     data: postsData,
@@ -68,10 +69,10 @@ export default function AdminDashboard() {
 
   const { data: categoriesData, isLoading: categoriesLoading } = useGetCategoriesQuery()
   const [deletePost, { isLoading: isDeleting }] = useDeletePostMutation();
-  const{data} = useGetCommentsByPostIdQuery()
 
-  const posts = postsData?.posts || []
-  const categories = categoriesData || []
+
+  const posts = useMemo(() => postsData?.posts || [], [postsData])
+  const categories = useMemo(() => categoriesData || [], [categoriesData])
 
   // Check if user is admin (you might want to implement proper role checking)
   const isAdmin = userProfile?.role === "admin" // Replace with your admin logic
@@ -104,39 +105,28 @@ export default function AdminDashboard() {
 
     const postsThisMonth = posts.filter((post) => {
       try {
-        // Handle different date formats safely
-        let postDate: Date
-        if (post.createdAt instanceof Date) {
-          postDate = post.createdAt
-        } else if (typeof post.createdAt === "string") {
-          postDate = parseISO(post.createdAt)
-        } else {
-          return false // Skip invalid dates
-        }
-        return isAfter(postDate, thisMonth)
-      } catch (error) {
-        console.warn("Invalid date format for post:", post.id, post.createdAt)
-        return false
+        // Safely parse string into Date object
+        const postDate = parseISO(post.createdAt as string); // or use new Date(post.createdAt)
+        return isAfter(postDate, thisMonth);
+      } catch {
+        console.warn("Invalid date format for post:", post.id, post.createdAt);
+        return false;
       }
-    }).length
+    }).length;
+
 
     const viewsThisMonth = posts
       .filter((post) => {
         try {
-          let postDate: Date
-          if (post.createdAt instanceof Date) {
-            postDate = post.createdAt
-          } else if (typeof post.createdAt === "string") {
-            postDate = parseISO(post.createdAt)
-          } else {
-            return false
-          }
-          return isAfter(postDate, thisMonth)
-        } catch (error) {
-          return false
+          // Always parse string into a Date
+          const postDate = parseISO(post.createdAt as string); // or new Date(post.createdAt)
+          return isAfter(postDate, thisMonth);
+        } catch {
+          console.warn("Invalid date:", post.id, post.createdAt);
+          return false;
         }
       })
-      .reduce((sum, post) => sum + (post.views || 0), 0)
+      .reduce((sum, post) => sum + (post.views || 0), 0);
 
     // Top category
     const categoryCount = new Map<string, number>()
@@ -201,25 +191,23 @@ export default function AdminDashboard() {
         default:
           // Safe date handling for sorting
           try {
-            aValue =
-              a.createdAt instanceof Date
-                ? a.createdAt.getTime()
-                : typeof a.createdAt === "string"
-                  ? parseISO(a.createdAt).getTime()
-                  : 0
+            aValue = isDate(a.createdAt)
+              ? a.createdAt.getTime()
+              : typeof a.createdAt === "string"
+                ? parseISO(a.createdAt).getTime()
+                : 0;
           } catch {
-            aValue = 0
+            aValue = 0;
           }
 
           try {
-            bValue =
-              b.createdAt instanceof Date
-                ? b.createdAt.getTime()
-                : typeof b.createdAt === "string"
-                  ? parseISO(b.createdAt).getTime()
-                  : 0
+            bValue = isDate(b.createdAt)
+              ? b.createdAt.getTime()
+              : typeof b.createdAt === "string"
+                ? parseISO(b.createdAt).getTime()
+                : 0;
           } catch {
-            bValue = 0
+            bValue = 0;
           }
       }
 
@@ -231,8 +219,11 @@ export default function AdminDashboard() {
     })
 
     return filtered
-  }, [posts, searchTerm, categoryFilter, sortBy, sortOrder])
+  }, [posts, searchTerm, categoryFilter, sortBy])
 
+  function isDate(value: unknown): value is Date {
+    return value instanceof Date && !isNaN(value.getTime());
+  }
   // Chart data
   const getCategoryData = () => {
     const categoryMap = new Map<string, number>()
@@ -253,47 +244,53 @@ export default function AdminDashboard() {
   }
 
   const getTrendData = () => {
-    const dateRange = timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90
-    const viewsData = new Array(dateRange).fill(0)
-    const likesData = new Array(dateRange).fill(0)
-    const commentsData = new Array(dateRange).fill(0)
+    const dateRange = timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90;
+    const viewsData = new Array(dateRange).fill(0);
+    const likesData = new Array(dateRange).fill(0);
+    const commentsData = new Array(dateRange).fill(0);
 
-    const today = new Date()
+    const today = new Date();
 
     posts.forEach((post) => {
       try {
-        // Handle different date formats safely
-        let postDate: Date
-        if (post.createdAt instanceof Date) {
-          postDate = post.createdAt
+        let postDate: Date;
+
+        if (post.createdAt && typeof post.createdAt === "object" && post.createdAt) {
+          postDate = post.createdAt;
         } else if (typeof post.createdAt === "string") {
-          postDate = parseISO(post.createdAt)
+          postDate = parseISO(post.createdAt);
+        } else if (post.createdAt && typeof (post.createdAt as Timestamp).toDate === "function") {
+          // Type assertion for Firebase Timestamp
+          postDate = (post.createdAt as Timestamp).toDate();
         } else {
-          return // Skip invalid dates
+          return; // skip invalid dates
         }
 
-        const daysAgo = Math.floor((today.getTime() - postDate.getTime()) / (1000 * 60 * 60 * 24))
+        const daysAgo = Math.floor((today.getTime() - postDate.getTime()) / (1000 * 60 * 60 * 24));
 
         if (daysAgo >= 0 && daysAgo < dateRange) {
-          const index = dateRange - daysAgo - 1
-          viewsData[index] += post.views || 0
-          likesData[index] += post.likes || 0
-          commentsData[index] += post.comments?.length || 0
+          const index = dateRange - daysAgo - 1;
+          viewsData[index] += post.views || 0;
+          likesData[index] += post.likes || 0;
+          commentsData[index] += post.comments?.length || 0;
         }
-      } catch (error) {
-        console.warn("Invalid date format for post:", post.id, post.createdAt)
+      } catch {
+        console.warn("Invalid date format for post:", post.id, post.createdAt);
       }
-    })
+    });
 
-    const labels = Array.from({ length: dateRange }, (_, i) => format(subDays(today, dateRange - i - 1), "MMM dd"))
+    const labels = Array.from({ length: dateRange }, (_, i) =>
+      format(subDays(today, dateRange - i - 1), "MMM dd")
+    );
 
     return {
       labels,
       views: viewsData,
       likes: likesData,
       comments: commentsData,
-    }
-  }
+    };
+  };
+
 
   const getTopPosts = (sortBy: "views" | "likes" | "comments", limit = 5) => {
     return [...posts] // Create a copy first
@@ -314,7 +311,7 @@ export default function AdminDashboard() {
           description: "The post has been successfully deleted.",
         })
         refetchPosts()
-      } catch (error) {
+      } catch {
         toast({
           title: "Error",
           description: "Failed to delete the post. Please try again.",
@@ -754,7 +751,7 @@ export default function AdminDashboard() {
                         {(() => {
                           try {
                             const date =
-                              (post.createdAt instanceof Date)
+                              (post.createdAt)
                                 ? post.createdAt
                                 : typeof post.createdAt === "string"
                                   ? parseISO(post.createdAt)

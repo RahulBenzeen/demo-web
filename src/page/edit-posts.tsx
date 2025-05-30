@@ -37,7 +37,7 @@ export default function EditPost() {
     data: post,
     isLoading: isLoadingPost,
     isError,
-    error,
+    // error,
   } = useGetPostByIdQuery(id || "", {
     skip: !id,
   })
@@ -150,7 +150,7 @@ export default function EditPost() {
         title: "Image uploaded",
         description: "Cover image has been uploaded successfully",
       })
-    } catch (error) {
+    } catch  {
       toast({
         title: "Upload failed",
         description: "Failed to upload image. Please try again.",
@@ -161,16 +161,16 @@ export default function EditPost() {
     }
   }
 
-  const handleImageUpload = async (file: File): Promise<string> => {
-    try {
-      const storageRef = ref(storage, `posts/images/${Date.now()}-${file.name}`)
-      await uploadBytes(storageRef, file)
-      const imageUrl = await getDownloadURL(storageRef)
-      return imageUrl
-    } catch (error) {
-      throw new Error("Failed to upload image")
-    }
-  }
+  // const handleImageUpload = async (file: File): Promise<string> => {
+  //   try {
+  //     const storageRef = ref(storage, `posts/images/${Date.now()}-${file.name}`)
+  //     await uploadBytes(storageRef, file)
+  //     const imageUrl = await getDownloadURL(storageRef)
+  //     return imageUrl
+  //   } catch (error) {
+  //     throw new Error("Failed to upload image")
+  //   }
+  // }
 
   if (!currentUser) {
     return (
@@ -333,7 +333,7 @@ export default function EditPost() {
                 onChange={setContent}
                 height="400px"
                 placeholder="Write your post content here..."
-                onImageUpload={handleImageUpload}
+                // onImageUpload={handleImageUpload}
                 label="Post Content"
               />
             </CardContent>

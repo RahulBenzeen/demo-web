@@ -87,8 +87,12 @@ export function PieChart({ data }: PieChartProps) {
           label: (context) => {
             const label = context.label || '';
             const value = context.raw as number;
-            const total = context.chart.getDatasetMeta(0).total;
-            const percentage = Math.round((value / total) * 100);
+            // Calculate total manually from dataset
+            const dataset = context.chart.data.datasets[context.datasetIndex];
+            const total = Array.isArray(dataset.data)
+              ? dataset.data.reduce((sum: number, val) => typeof val === "number" ? sum + val : sum, 0)
+              : 0;
+            const percentage = total ? Math.round((value / total) * 100) : 0;
             return `${label}: ${value} (${percentage}%)`;
           }
         },

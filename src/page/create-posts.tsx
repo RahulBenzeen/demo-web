@@ -191,22 +191,22 @@ export default function CreatePost() {
     }
   }
 
-  const handleImageUpload = async (file: File): Promise<string> => {
-    try {
-      // Validate file size (max 1MB for content images)
-      if (file.size > 1 * 1024 * 1024) {
-        throw new Error("Image size exceeds 1MB limit")
-      }
+  // const handleImageUpload = async (file: File): Promise<string> => {
+  //   try {
+  //     // Validate file size (max 1MB for content images)
+  //     if (file.size > 1 * 1024 * 1024) {
+  //       throw new Error("Image size exceeds 1MB limit")
+  //     }
 
-      const storageRef = ref(storage, `posts/images/${Date.now()}-${file.name}`)
-      await uploadBytes(storageRef, file)
-      const imageUrl = await getDownloadURL(storageRef)
-      return imageUrl
-    } catch (error) {
-      console.error("Image upload error:", error)
-      throw new Error("Failed to upload image. Please try a smaller file.")
-    }
-  }
+  //     const storageRef = ref(storage, `posts/images/${Date.now()}-${file.name}`)
+  //     await uploadBytes(storageRef, file)
+  //     const imageUrl = await getDownloadURL(storageRef)
+  //     return imageUrl
+  //   } catch (error) {
+  //     console.error("Image upload error:", error)
+  //     throw new Error("Failed to upload image. Please try a smaller file.")
+  //   }
+  // }
 
   const removeCoverImage = () => {
     setCoverImage("")
@@ -360,7 +360,7 @@ export default function CreatePost() {
                   onChange={setContent}
                   height="500px"
                   placeholder="Write your post content here..."
-                  onImageUpload={handleImageUpload}
+                  // onImageUpload={handleImageUpload}
                   label="Post Content"
                 />
               </TabsContent>
