@@ -218,7 +218,7 @@ export default function Contact() {
               <div>
                 <h3 className="font-medium">Email</h3>
                 <p className="text-muted-foreground">rahul.developer23@gmail.com</p>
-                <p className="text-sm text-muted-foreground mt-1">Support: support@teamapp.com</p>
+                <p className="text-sm text-muted-foreground mt-1">Support: rahul.developer23@gmail.com</p>
               </div>
             </div>
           </CardContent>
@@ -251,13 +251,13 @@ export default function Contact() {
           <div>
             <h3 className="font-semibold text-lg mb-3">Business Inquiries</h3>
             <p className="text-muted-foreground">
-              Interested in partnerships? Contact our business development team at partnerships@teamapp.com
+              Interested in partnerships? Contact our business development team at rahul.developer23@gmail.com
             </p>
           </div>
           <div>
             <h3 className="font-semibold text-lg mb-3">Feedback</h3>
             <p className="text-muted-foreground">
-              We value your feedback to improve our services. Share your thoughts at feedback@teamapp.com
+              We value your feedback to improve our services. Share your thoughts at rahul.developer23@gmail.com
             </p>
           </div>
         </div>

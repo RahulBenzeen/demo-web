@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CalendarDays, Mail, Globe, BookUser, BarChart3, MapPin, Link, Users } from 'lucide-react';
+import { CalendarDays, Mail, Globe, BookUser, MapPin, Link, Users } from 'lucide-react';
 import { useTheme } from '@/components/theme-provider';
 
 const UserProfilePage = () => {
@@ -76,7 +76,7 @@ console.log({user})
                 )}
                 
                 <div className="mt-4 flex flex-wrap justify-center md:justify-start gap-3">
-                  <Button variant="primary" className="rounded-full px-6 py-3 shadow-md">
+                  <Button variant="default" className="rounded-full px-6 py-3 shadow-md">
                     <Mail className="mr-2 h-4 w-4" /> Message
                   </Button>
                   <Button 

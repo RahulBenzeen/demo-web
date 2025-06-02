@@ -212,7 +212,13 @@ export default function Profile() {
                 <div className="space-y-1">
                   <Label>Last Login</Label>
                   <p className="text-sm">
-                    {userProfile.lastLogin?.toDate ? userProfile.lastLogin.toDate().toLocaleDateString() : "N/A"}
+                    {userProfile.lastLogin
+                      ? typeof userProfile.lastLogin === "string"
+                        ? new Date(userProfile.lastLogin).toLocaleDateString()
+                        : userProfile.lastLogin && typeof userProfile.lastLogin === "object" && "toDate" in userProfile.lastLogin && typeof userProfile.lastLogin.toDate === "function"
+                          ? userProfile.lastLogin.toDate().toLocaleDateString()
+                          : "N/A"
+                      : "N/A"}
                   </p>
                 </div>
               </CardContent>
