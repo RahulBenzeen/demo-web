@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft, Share2, Bookmark, Edit } from 'lucide-react'
 import { LikeButton } from '@/components/like-button'
 import { cn } from '@/utils/utils'
-import type { Post } from '@/store/postApi'
+import { Post } from '@/utils/types/interfaces'
+
 
 interface PostHeaderProps {
   post: Post

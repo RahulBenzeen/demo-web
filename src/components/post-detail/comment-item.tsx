@@ -9,9 +9,8 @@ import { ThumbsUp, MessageSquare, MoreHorizontal } from 'lucide-react'
 import { useToast } from '@/components/ui/use-toast'
 import { useAddReplyMutation } from '@/store/postApi'
 import { cn } from '@/utils/utils'
-import type { Comment } from '@/store/postApi'
 import { Link } from 'react-router-dom'
-import { Reply } from '@/store/postApi'
+import { Comment,Reply } from '@/utils/types/interfaces'
 
 interface CommentItemProps {
   comment: Comment

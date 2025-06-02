@@ -2,11 +2,11 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Post } from "@/store/postApi"
 import { Calendar, MessageSquare, Eye } from "lucide-react"
 import { cn } from "@/utils/utils"
 import { useState, useMemo } from "react"
 import { LikeButton } from "@/components/like-button"
+import { Post } from "@/utils/types/interfaces"
 
 interface PostCardProps {
   post: Post

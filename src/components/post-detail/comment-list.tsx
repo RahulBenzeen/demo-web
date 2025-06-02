@@ -2,7 +2,7 @@ import React from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CommentItem } from './comment-item'
-import type { Comment } from '@/store/postApi'
+import { Comment } from '@/utils/types/interfaces'
 
 interface CommentsListProps {
   comments: Comment[]

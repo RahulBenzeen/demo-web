@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { PostCard } from '@/components/post-card'
 import { PostListItem } from '@/components/post-list-item'
-import type { Post } from '@/store/postApi'
+import { Post } from '@/utils/types/interfaces'
+
 
 interface PostsGridProps {
   isInitialLoading: boolean

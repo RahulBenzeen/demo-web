@@ -5,7 +5,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { Calendar, Eye, MessageSquare } from 'lucide-react'
-import type { Post } from '@/store/postApi'
+import { Post } from '@/utils/types/interfaces'
+
 
 interface PostContentProps {
   post: Post
