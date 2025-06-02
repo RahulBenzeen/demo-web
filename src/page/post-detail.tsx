@@ -24,6 +24,7 @@ import { PostHeader } from "@/components/post-detail/post-header"
 import { PostContent } from "@/components/post-detail/post-content"
 import { CommentForm } from "@/components/post-detail/comment-form"
 import { CommentsList } from "@/components/post-detail/comment-list"
+import { sendNotificationToUser } from "@/lib/notifications"
 
 export default function PostDetail() {
   const { id } = useParams<{ id: string }>()
@@ -104,6 +105,16 @@ export default function PostDetail() {
         commentId,
         userId: currentUser.uid,
       }).unwrap()
+      // Optionally, notify the comment author if not the current user
+      const commentObj = comments.find((c: any) => c.id === commentId)
+      if (commentObj && commentObj.userId !== currentUser.uid) {
+        console.log("sending notifications !")
+        sendNotificationToUser(
+          commentObj.userId,
+          "New like on your comment",
+          `${currentUser.displayName || "Someone"} liked your comment: "${commentObj.text?.slice(0, 50) || ""}"`
+        )
+      }
     } catch (error: any) {
       console.error("Failed to toggle like:", error)
       toast({
@@ -130,7 +141,18 @@ export default function PostDetail() {
         commentId,
         replyId,
         userId: currentUser.uid,
-      }).unwrap()
+      }).unwrap();
+
+      // Find the comment and reply objects
+      const commentObj = comments.find((c: any) => c.id === commentId)
+      const replyObj = commentObj?.replies?.find((r: any) => r.id === replyId)
+      if (replyObj && replyObj.userId !== currentUser.uid) {
+        sendNotificationToUser(
+          replyObj.userId,
+          "New like on your reply",
+          `${currentUser.displayName || "Someone"} liked your reply: "${replyObj.text?.slice(0, 50) || ""}"`
+        )
+      }
     } catch (error: any) {
       console.error("Failed to toggle reply like:", error)
       toast({

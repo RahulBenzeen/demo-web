@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -14,12 +14,13 @@ import { toast } from "@/components/ui/use-toast"
 import { ToastAction } from "@/components/ui/toast"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useAuth } from "../contexts/AuthContext"
-import { db, storage } from "../lib/firebase"
+import { db, } from "@/lib/firebase"
 import { collection, addDoc, serverTimestamp } from "firebase/firestore"
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
+
 import { sendNotificationToUser } from "@/lib/notifications"
 import { useGetCategoriesQuery } from "@/store/postApi"
 
+import { uploadImage} from "@/lib/cloudinary"
 
 export default function CreatePost() {
   const [title, setTitle] = useState("")
@@ -31,12 +32,23 @@ export default function CreatePost() {
   const [isUploading, setIsUploading] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [validationError, setValidationError] = useState("")
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const{data: Categories} = useGetCategoriesQuery();
-
+  const { data: Categories } = useGetCategoriesQuery()
   const navigate = useNavigate()
   const { currentUser, userProfile } = useAuth()
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!currentUser) {
+      toast({
+        title: "Authentication required",
+        description: "You must be signed in to create a post",
+        variant: "destructive",
+      })
+      navigate("/sign-in")
+    }
+  }, [currentUser, navigate])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -64,15 +76,7 @@ export default function CreatePost() {
       return
     }
 
-    if (!currentUser) {
-      toast({
-        title: "Authentication required",
-        description: "You must be signed in to create a post",
-        variant: "destructive",
-      })
-      navigate("/sign-in")
-      return
-    }
+    if (!currentUser) return
 
     setIsLoading(true)
 
@@ -108,14 +112,16 @@ export default function CreatePost() {
             View Posts
           </ToastAction>
         ),
-      });
+      })
 
-      await sendNotificationToUser(
-        currentUser.uid,
-        "New Post",
-        `${currentUser.displayName} posted a new postt`
-      );
-
+      // Send notification
+      if (userProfile?.displayName) {
+        await sendNotificationToUser(
+          currentUser.uid,
+          "New Post",
+          `${userProfile.displayName} posted a new post`
+        )
+      }
 
       navigate(`/${docRef.id}`)
     } catch (err) {
@@ -131,9 +137,7 @@ export default function CreatePost() {
   }
 
   const createExcerpt = (html: string): string => {
-    // Remove HTML tags
     const text = html.replace(/<[^>]*>/g, "")
-    // Return first 150 characters
     return text.length > 150 ? text.substring(0, 150) + "..." : text
   }
 
@@ -142,6 +146,82 @@ export default function CreatePost() {
       fileInputRef.current.click()
     }
   }
+
+  // const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0]
+  //   if (!file) return
+
+  //   // Validate file type
+  //   if (!file.type.startsWith("image/")) {
+  //     toast({
+  //       title: "Invalid file type",
+  //       description: "Please upload an image file (JPEG, PNG, etc.)",
+  //       variant: "destructive",
+  //     })
+  //     return
+  //   }
+
+  //   // Validate file size (max 2MB)
+  //   if (file.size > 2 * 1024 * 1024) {
+  //     toast({
+  //       title: "File too large",
+  //       description: "Please upload an image smaller than 2MB",
+  //       variant: "destructive",
+  //     })
+  //     return
+  //   }
+
+  //   setIsUploading(true)
+  //   try {
+  //     // Sanitize filename
+  //     const fileName = sanitizeFileName(`${Date.now()}-${file.name}`)
+  //     const storageRef = ref(storage, `posts/covers/${fileName}`)
+      
+  //     // Upload with metadata
+  //     await uploadBytes(storageRef, file, {
+  //       contentType: file.type,
+  //       cacheControl: "public, max-age=31536000" // 1 year cache
+  //     })
+      
+  //     const imageUrl = await getDownloadURL(storageRef)
+  //     setCoverImage(imageUrl)
+      
+  //     toast({
+  //       title: "Image uploaded",
+  //       description: "Cover image has been uploaded successfully",
+  //     })
+  //   } catch (error) {
+  //     console.error("Upload error:", error)
+      
+  //     let errorMessage = "Failed to upload image. Please try again."
+      
+  //     // Handle specific errors
+  //     if (error instanceof FirebaseError) {
+  //       switch (error.code) {
+  //         case "storage/unauthorized":
+  //           errorMessage = "You don't have permission to upload files. Please sign in again."
+  //           break
+  //         case "storage/retry-limit-exceeded":
+  //           errorMessage = "Upload failed after multiple attempts. Check your network connection."
+  //           break
+  //         case "storage/canceled":
+  //           errorMessage = "Upload was canceled."
+  //           break
+  //       }
+  //     } else if (error instanceof Error && error.message.includes("CORS")) {
+  //       errorMessage = "CORS error: Please configure Firebase Storage CORS settings"
+  //     }
+
+  //     toast({
+  //       title: "Upload failed",
+  //       description: errorMessage,
+  //       variant: "destructive",
+  //     })
+  //   } finally {
+  //     setIsUploading(false)
+  //   }
+  // }
+
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -169,20 +249,17 @@ export default function CreatePost() {
 
     setIsUploading(true)
     try {
-      const storageRef = ref(storage, `posts/covers/${Date.now()}-${file.name}`)
-      await uploadBytes(storageRef, file)
-      const imageUrl = await getDownloadURL(storageRef)
+      const imageUrl = await uploadImage(file)
+      setCoverImage(imageUrl.url)
 
-      setCoverImage(imageUrl)
       toast({
         title: "Image uploaded",
         description: "Cover image has been uploaded successfully",
       })
     } catch (error) {
-      console.error("Upload error:", error)
       toast({
         title: "Upload failed",
-        description: "Failed to upload image. Please try again.",
+        description: (error as Error).message || "Failed to upload image.",
         variant: "destructive",
       })
     } finally {
@@ -190,29 +267,31 @@ export default function CreatePost() {
     }
   }
 
-  // const handleImageUpload = async (file: File): Promise<string> => {
-  //   try {
-  //     // Validate file size (max 1MB for content images)
-  //     if (file.size > 1 * 1024 * 1024) {
-  //       throw new Error("Image size exceeds 1MB limit")
+const removeCoverImage = async () => {
+  // if (coverImage) {
+  //   const publicId = getPublicId(coverImage)
+  //   if (publicId) {
+  //     try {
+  //       await deleteImage(publicId)
+  //       toast({
+  //         title: "Image removed",
+  //         description: "Cover image deleted from Cloudinary",
+  //       })
+  //     } catch (error) {
+  //       toast({
+  //         title: "Delete failed",
+  //         description: (error as Error).message || "Failed to delete image.",
+  //         variant: "destructive",
+  //       })
   //     }
-
-  //     const storageRef = ref(storage, `posts/images/${Date.now()}-${file.name}`)
-  //     await uploadBytes(storageRef, file)
-  //     const imageUrl = await getDownloadURL(storageRef)
-  //     return imageUrl
-  //   } catch (error) {
-  //     console.error("Image upload error:", error)
-  //     throw new Error("Failed to upload image. Please try a smaller file.")
   //   }
   // }
 
-  const removeCoverImage = () => {
-    setCoverImage("")
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ""
-    }
+  setCoverImage("")
+  if (fileInputRef.current) {
+    fileInputRef.current.value = ""
   }
+}
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -267,9 +346,10 @@ export default function CreatePost() {
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent>
-                   
                     {Categories?.map((category) => (
-                        <SelectItem key={category.id} value={category.name}>{category.name}</SelectItem>
+                      <SelectItem key={category.id} value={category.name}>
+                        {category.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -316,7 +396,7 @@ export default function CreatePost() {
               {coverImage && (
                 <div className="mt-2 relative aspect-video w-full max-w-md overflow-hidden rounded-md border">
                   <img
-                    src={coverImage || "/placeholder.svg"}
+                    src={coverImage}
                     alt="Cover preview"
                     className="h-full w-full object-cover"
                   />
@@ -359,7 +439,6 @@ export default function CreatePost() {
                   onChange={setContent}
                   height="500px"
                   placeholder="Write your post content here..."
-                  // onImageUpload={handleImageUpload}
                   label="Post Content"
                 />
               </TabsContent>

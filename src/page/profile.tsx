@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
@@ -12,9 +11,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/components/ui/use-toast"
-import { Loader2, Camera, LogOut } from "lucide-react"
+import { Loader2, LogOut } from "lucide-react"
 import { useAuth } from "../contexts/AuthContext"
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage"
+// import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage"
 
 export default function Profile() {
   const { currentUser, userProfile, logout, updateUserProfile } = useAuth()
@@ -36,7 +35,7 @@ export default function Profile() {
     try {
       await logout()
       navigate("/sign-in")
-    } catch (error) {
+    } catch  {
       toast({
         title: "Error",
         description: "Failed to log out. Please try again.",
@@ -59,7 +58,7 @@ export default function Profile() {
         title: "Profile updated",
         description: "Your profile has been updated successfully",
       })
-    } catch (error) {
+    } catch  {
       toast({
         title: "Error",
         description: "Failed to update profile. Please try again.",
@@ -76,34 +75,34 @@ export default function Profile() {
     }
   }
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+  // const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0]
+  //   if (!file) return
 
-    setIsUploading(true)
-    try {
-      const storage = getStorage()
-      const storageRef = ref(storage, `avatars/${currentUser.uid}/${Date.now()}-${file.name}`)
+  //   setIsUploading(true)
+  //   try {
+  //     const storage = getStorage()
+  //     const storageRef = ref(storage, `avatars/${currentUser.uid}/${Date.now()}-${file.name}`)
 
-      await uploadBytes(storageRef, file)
-      const photoURL = await getDownloadURL(storageRef)
+  //     await uploadBytes(storageRef, file)
+  //     const photoURL = await getDownloadURL(storageRef)
 
-      await updateUserProfile({ photoURL })
+  //     await updateUserProfile({ photoURL })
 
-      toast({
-        title: "Avatar updated",
-        description: "Your profile picture has been updated successfully",
-      })
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to upload image. Please try again.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsUploading(false)
-    }
-  }
+  //     toast({
+  //       title: "Avatar updated",
+  //       description: "Your profile picture has been updated successfully",
+  //     })
+  //   } catch (error) {
+  //     toast({
+  //       title: "Error",
+  //       description: "Failed to upload image. Please try again.",
+  //       variant: "destructive",
+  //     })
+  //   } finally {
+  //     setIsUploading(false)
+  //   }
+  // }
 
   return (
     <div className="container max-w-4xl py-10">
@@ -123,11 +122,11 @@ export default function Profile() {
                   </AvatarFallback>
                 </>
               )}
-              <div className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-2">
+              {/* <div className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-2">
                 <Camera className="h-4 w-4" />
-              </div>
+              </div> */}
             </Avatar>
-            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
+            {/* <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} /> */}
           </div>
 
           <div className="flex-1">
