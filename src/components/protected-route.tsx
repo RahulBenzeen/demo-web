@@ -2,7 +2,7 @@
 
 import { type ReactNode, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { useAuth } from "../contexts/AuthContext"
+import { useAuth } from "@/contexts/AuthContext"
 import { Loader2 } from "lucide-react"
 
 interface ProtectedRouteProps {

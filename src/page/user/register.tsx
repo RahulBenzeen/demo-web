@@ -11,27 +11,30 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { useToast } from "@/components/ui/use-toast"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { FcGoogle } from "react-icons/fc"
-import { useAuth } from "../contexts/AuthContext"
+import { useAuth } from "@/contexts/AuthContext"
 
-export default function SignIn() {
+export default function SignUp() {
+  const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [rememberMe, setRememberMe] = useState(false)
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [agreeTerms, setAgreeTerms] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
 
   const navigate = useNavigate()
   const { toast } = useToast()
-  const { currentUser, login, googleLogin } = useAuth()
+  const { currentUser, signup, googleLogin } = useAuth();
 
-  if (currentUser) {
+  if(currentUser){
     navigate('/')
   }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!email || !password) {
+    if (!name || !email || !password || !confirmPassword) {
       toast({
         title: "Error",
         description: "Please fill in all fields",
@@ -40,24 +43,42 @@ export default function SignIn() {
       return
     }
 
+    if (password !== confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Passwords do not match",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (!agreeTerms) {
+      toast({
+        title: "Error",
+        description: "You must agree to the terms and conditions",
+        variant: "destructive",
+      })
+      return
+    }
+
     setIsLoading(true)
     try {
-      const user = await login(email, password)
+      await signup(email, password, name)
       toast({
-        title: "Success",
-        description: `Welcome back${user.displayName ? `, ${user.displayName}` : ""}!`,
+        title: "Account created",
+        description: `Welcome, ${name}!`,
       })
       navigate("/")
     } catch (error: unknown) {
-      let message = "Invalid email or password"
+      let message = "Failed to create account"
       if (error instanceof Error) {
         // Handle specific Firebase auth errors
-        if (error.message.includes("user-not-found")) {
-          message = "No account found with this email"
-        } else if (error.message.includes("wrong-password")) {
-          message = "Incorrect password"
-        } else if (error.message.includes("too-many-requests")) {
-          message = "Too many failed login attempts. Please try again later"
+        if (error.message.includes("email-already-in-use")) {
+          message = "Email already in use. Try signing in instead"
+        } else if (error.message.includes("weak-password")) {
+          message = "Password is too weak. Use at least 6 characters"
+        } else if (error.message.includes("invalid-email")) {
+          message = "Invalid email address"
         }
       }
       toast({
@@ -95,14 +116,18 @@ export default function SignIn() {
   }
 
   return (
-    <div className="flex min-h-[65vh] items-center justify-center px-4">
+    <div className="flex min-h-[80vh] items-center justify-center px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Sign in</CardTitle>
-          <CardDescription>Enter your credentials or use Google to continue</CardDescription>
+          <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
+          <CardDescription>Enter your information to create an account</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name</Label>
+              <Input id="name" placeholder="John Doe" value={name} onChange={(e) => setName(e.target.value)} required />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -115,12 +140,7 @@ export default function SignIn() {
               />
             </div>
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Link to="/forgot-password" className="text-sm text-primary hover:underline">
-                  Forgot password?
-                </Link>
-              </div>
+              <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -142,14 +162,29 @@ export default function SignIn() {
                 </Button>
               </div>
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+            </div>
             <div className="flex items-center space-x-2">
               <Checkbox
-                id="remember"
-                checked={rememberMe}
-                onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                id="terms"
+                checked={agreeTerms}
+                onCheckedChange={(checked) => setAgreeTerms(checked as boolean)}
+                required
               />
-              <Label htmlFor="remember" className="text-sm font-normal">
-                Remember me
+              <Label htmlFor="terms" className="text-sm font-normal">
+                I agree to the{" "}
+                <Link to="/terms" className="text-primary hover:underline">
+                  terms and conditions
+                </Link>
               </Label>
             </div>
           </CardContent>
@@ -158,10 +193,10 @@ export default function SignIn() {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Signing in...
+                  Creating account...
                 </>
               ) : (
-                "Sign in"
+                "Create account"
               )}
             </Button>
 
@@ -180,15 +215,15 @@ export default function SignIn() {
               ) : (
                 <>
                   <FcGoogle className="h-5 w-5" />
-                  Sign in with Google
+                  Sign up with Google
                 </>
               )}
             </Button>
 
             <p className="mt-4 text-center text-sm text-muted-foreground">
-              Don&apos;t have an account?{" "}
-              <Link to="/sign-up" className="text-primary hover:underline">
-                Sign up
+              Already have an account?{" "}
+              <Link to="/sign-in" className="text-primary hover:underline">
+                Sign in
               </Link>
             </p>
           </CardFooter>

@@ -4,7 +4,7 @@ import {
   useSearchPostsQuery,
   useGetCategoriesQuery,
 } from "@/store/postApi";
-import type { Post } from "@/store/postApi";
+
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInfiniteScroll } from "@/utils/useInfiniteScroll";
@@ -13,6 +13,7 @@ import { FilterSidebar } from "@/components/posts/filter-sidebar";
 import { PostsHeader } from "@/components/posts/post-header";
 import { ActiveFilters } from "@/components/posts/active-filters";
 import { PostsGrid } from "@/components/posts/post-grid";
+import { Post } from "@/utils/types/interfaces";
 
 export default function PostsPage() {
   const [searchText, setSearchText] = useState("");
@@ -161,8 +162,8 @@ export default function PostsPage() {
   const isLoadingMore = isFetching && !isLoading && !debouncedSearchText;
 
   // Active filter count for badge
-  const activeFilterCount = useMemo(() => 
-    selectedTags.length + selectedCategories.length + (debouncedSearchText ? 1 : 0), 
+  const activeFilterCount = useMemo(() =>
+    selectedTags.length + selectedCategories.length + (debouncedSearchText ? 1 : 0),
     [selectedTags, selectedCategories, debouncedSearchText]
   );
 

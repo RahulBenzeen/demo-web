@@ -1,4 +1,4 @@
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useGetSavedPostsQuery } from "@/store/postApi";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";

@@ -19,15 +19,9 @@ import {
 } from "firebase/firestore"
 import { auth, db } from "@/lib/firebase"
 import type { BaseQueryFn } from "@reduxjs/toolkit/query"
-import type { Post } from "@/store/postApi"
+import { FirebaseQueryArgs, Post } from "@/utils/types/interfaces"
 
-interface FirebaseQueryArgs {
-  url: string
-  method: string
-  body?: any
-  params?: Record<string, any>
-  id?: string
-}
+
 
 export const firebaseBaseQuery =
   (): BaseQueryFn<FirebaseQueryArgs, unknown, unknown> =>
@@ -428,18 +422,18 @@ export const firebaseBaseQuery =
             (post) =>
               post.title?.toLowerCase().includes(searchTerm) ||
               post.body?.toLowerCase().includes(searchTerm) ||
-              post.tags?.some((tag) => tag.toLowerCase().includes(searchTerm)),
+              post.tags?.some((tag: string) => tag.toLowerCase().includes(searchTerm)),
           )
 
         return { data }
       }
 
       return { error: "Unsupported endpoint or method" }
-    } catch (error: any) {
-      console.error("Firebase query error:", error)
-      if (error.code === "permission-denied") {
+    } catch (error: unknown) {
+
+      if (typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "permission-denied") {
         return { error: "Permission denied. Please check your authentication status." }
       }
-      return { error: error?.message || "Unknown error occurred" }
+      return { error: (typeof error === "object" && error !== null && "message" in error) ? (error as { message?: string }).message : "Unknown error occurred" }
     }
   }

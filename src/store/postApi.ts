@@ -1,80 +1,7 @@
 import { createApi, type BaseQueryFn } from "@reduxjs/toolkit/query/react";
 import { firebaseBaseQuery } from "@/utils/firebaseBaseQuery";
+import { PostsResponse,Category, Comment, Post, Reply, User  } from "@/utils/types/interfaces";
 
-export interface Post {
-  id: string;
-  title: string;
-  body: string;
-  excerpt?: string;
-  coverImage?: string;
-  tags: string[];
-  category: string;
-  authorId: string;
-  authorName: string;
-  authorImage?: string;
-  createdAt: string;
-  updatedAt: string;
-  likes: number;
-  views: number;
-  likedBy: string[];
-  comments: Comment[];
-}
-
-export interface Reply {
-  id: string;
-  userId: string;
-  userName: string;
-  userImage?: string;
-  text: string;
-  createdAt: string;
-  likes: number;
-  likedBy: string[];
-}
-
-export interface Comment {
-  id: string;
-  userId: string;
-  userName: string;
-  userImage?: string;
-  text: string;
-  createdAt: string;
-  likes: number;
-  likedBy: string[];
-  replies?: Reply[];
-  isEdited?: boolean;
-  updatedAt?: string;
-}
-
-export interface Category {
-  id: string;
-  name: string;
-  description?: string;
-  color?: string;
-  postCount: number;
-  createdAt: string;
-}
-
-export interface PostsResponse {
-  posts: Post[];
-  hasMore: boolean;
-  lastDocId: string | null;
-}
-
-// Add to your existing interfaces
-export interface User {
-  uid: string;
-  displayName: string;
-  email: string;
-  photoURL?: string;
-  bio?: string;
-  location?: string;
-  website?: string;
-  username?: string;
-  createdAt: string;
-  postCount: number;
-  followerCount: number;
-  followingCount: number;
-}
 
 
 function serializeTimestamps(obj: Record<string, any>): Record<string, any> {
@@ -165,9 +92,9 @@ export const postsAPI = createApi({
       providesTags: (result) =>
         result
           ? [
-              ...result.posts.map(({ id }) => ({ type: "Post" as const, id })),
-              { type: "Post", id: "LIST" },
-            ]
+            ...result.posts.map(({ id }) => ({ type: "Post" as const, id })),
+            { type: "Post", id: "LIST" },
+          ]
           : [{ type: "Post", id: "LIST" }],
       transformResponse: (response: any): PostsResponse => ({
         posts: response.posts.map(
@@ -294,9 +221,9 @@ export const postsAPI = createApi({
       providesTags: (result, error, postId) =>
         result
           ? [
-              ...result.map(({ id }) => ({ type: "Comment" as const, id })),
-              { type: "Comment", id: "LIST" },
-            ]
+            ...result.map(({ id }) => ({ type: "Comment" as const, id })),
+            { type: "Comment", id: "LIST" },
+          ]
           : [{ type: "Comment", id: "LIST" }],
     }),
 
@@ -504,9 +431,9 @@ export const postsAPI = createApi({
       providesTags: (result) =>
         result
           ? [
-              ...result.map(({ id }) => ({ type: "Post" as const, id })),
-              { type: "Post", id: "LIST" },
-            ]
+            ...result.map(({ id }) => ({ type: "Post" as const, id })),
+            { type: "Post", id: "LIST" },
+          ]
           : [{ type: "Post", id: "LIST" }],
     }),
 
@@ -532,28 +459,28 @@ export const postsAPI = createApi({
       ],
     }),
     getUserById: builder.query<User, string>({
-  query: (userId) => ({
-    url: `users/${userId}`,
-    method: "GET",
+      query: (userId) => ({
+        url: `users/${userId}`,
+        method: "GET",
+      }),
+      providesTags: (result, error, userId) => [{ type: 'User', id: userId }],
+      transformResponse: (response: any) => ({
+        uid: response.uid,
+        displayName: response.displayName,
+        email: response.email,
+        photoURL: response.photoURL,
+        bio: response.bio || '',
+        location: response.location || '',
+        website: response.website || '',
+        username: response.username || '',
+        createdAt: response.createdAt?.toDate?.().toISOString?.() || new Date().toISOString(),
+        postCount: response.postCount || 0,
+        followerCount: response.followerCount || 0,
+        followingCount: response.followingCount || 0,
+      }),
+    }),
   }),
-  providesTags: (result, error, userId) => [{ type: 'User', id: userId }],
-  transformResponse: (response: any) => ({
-    uid: response.uid,
-    displayName: response.displayName,
-    email: response.email,
-    photoURL: response.photoURL,
-    bio: response.bio || '',
-    location: response.location || '',
-    website: response.website || '',
-    username: response.username || '',
-    createdAt: response.createdAt?.toDate?.().toISOString?.() || new Date().toISOString(),
-    postCount: response.postCount || 0,
-    followerCount: response.followerCount || 0,
-    followingCount: response.followingCount || 0,
-  }),
-}),
-  }),
-  
+
 });
 
 export const {

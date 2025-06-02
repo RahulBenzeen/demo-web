@@ -26,8 +26,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useToast } from "@/components/ui/use-toast"
-import { useAuth } from "../contexts/AuthContext"
-import { useGetPostsQuery, useDeletePostMutation } from "../store/postApi"
+import { useAuth } from "@/contexts/AuthContext"
+import { useGetPostsQuery, useDeletePostMutation } from "@/store/postApi"
 
 export default function MyPosts() {
   const navigate = useNavigate()
@@ -89,7 +89,7 @@ export default function MyPosts() {
         description: "Your post has been deleted successfully",
       })
       refetch()
-    } catch (error) {
+    } catch{
       toast({
         title: "Error",
         description: "Failed to delete post. Please try again.",
@@ -144,7 +144,7 @@ export default function MyPosts() {
                 className="pl-8"
               />
             </div>
-            <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
+            <Select value={statusFilter} onValueChange={(value: "all" | "published" | "draft") => setStatusFilter(value)}>
               <SelectTrigger className="w-full sm:w-[140px]">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
@@ -154,7 +154,7 @@ export default function MyPosts() {
                 <SelectItem value="draft">Drafts</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
+            <Select value={sortBy} onValueChange={(value: "newest" | "oldest" | "popular") => setSortBy(value)}>
               <SelectTrigger className="w-full sm:w-[140px]">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>

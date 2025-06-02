@@ -11,10 +11,10 @@ import { RichTextEditor } from "@/components/rich-text-editor"
 import { Loader2, Save, ArrowLeft, Upload } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
-import { useAuth } from "../contexts/AuthContext"
-import { useGetCategoriesQuery, useGetPostByIdQuery, useUpdatePostMutation } from "../store/postApi"
+import { useAuth } from "@/contexts/AuthContext"
+import { useGetCategoriesQuery, useGetPostByIdQuery, useUpdatePostMutation } from "@/store/postApi"
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
-import { storage } from "../lib/firebase"
+import { storage } from "@/lib/firebase"
 import { useRef } from "react"
 
 export default function EditPost() {

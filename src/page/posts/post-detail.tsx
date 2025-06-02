@@ -16,10 +16,10 @@ import {
   useSavePostMutation,
   useUnsavePostMutation,
   useCheckSavedPostQuery,
-} from "../store/postApi"
+} from "@/store/postApi"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/components/ui/use-toast"
-import { useAuth } from "../contexts/AuthContext"
+import { useAuth } from "@/contexts/AuthContext"
 import { PostHeader } from "@/components/post-detail/post-header"
 import { PostContent } from "@/components/post-detail/post-content"
 import { CommentForm } from "@/components/post-detail/comment-form"

@@ -1,33 +1,33 @@
 "use client";
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { ThemeProvider } from "./components/theme-provider";
-import { Sidebar } from "./components/sidebar";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Sidebar } from "@/components/sidebar";
 import { useState, lazy, Suspense } from "react";
 import { Provider } from "react-redux";
-import { store } from "./store/store";
-import { Toaster } from "./components/toaster";
-import { AuthProvider } from "./contexts/AuthContext";
-import { ProtectedRoute } from "./components/protected-route";
-import { ErrorBoundary } from "./page/errorBoundary";
-import { LoadingSpinner } from "./components/ui/loading-spinner";
-import NotFoundPage from "./page/page-not-found";
+import { store } from "@/store/store";
+import { Toaster } from "@/components/toaster";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/protected-route";
+import { ErrorBoundary } from "@/page/helpers/errorBoundary";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import NotFoundPage from "@/page/helpers/page-not-found";
 
 // Lazy load pages
-const PostsPage = lazy(() => import("./page/posts"));
-const Contact = lazy(() => import("./page/contact"));
-const Dashboard = lazy(() => import("./page/dashboard"));
-const Settings = lazy(() => import("./page/setting"));
-const CreatePost = lazy(() => import("./page/create-posts"));
-const PostDetail = lazy(() => import("./page/post-detail"));
-const SignIn = lazy(() => import("./page/login"));
-const SignUp = lazy(() => import("./page/register"));
-const ForgotPassword = lazy(() => import("./page/forgot-password"));
-const Profile = lazy(() => import("./page/profile"));
-const SavedPosts = lazy(() => import("./page/saved-post"));
-const MyPosts = lazy(() => import("./page/my-posts"));
-const EditPost = lazy(() => import("./page/edit-posts"));
-const UserProfilePage = lazy(() => import("./page/user-profile"));
+const PostsPage = lazy(() => import("@/page/posts/posts"));
+const Contact = lazy(() => import("@/page/admin/contact"));
+const Dashboard = lazy(() => import("@/page/admin/dashboard"));
+const Settings = lazy(() => import("@/page/user/setting"));
+const CreatePost = lazy(() => import("@/page/posts/create-posts"));
+const PostDetail = lazy(() => import("@/page/posts/post-detail"));
+const SignIn = lazy(() => import("@/page/user/login"));
+const SignUp = lazy(() => import("@/page/user/register"));
+const ForgotPassword = lazy(() => import("@/page/user/forgot-password"));
+const Profile = lazy(() => import("@/page/user/profile"));
+const SavedPosts = lazy(() => import("@/page/posts/saved-post"));
+const MyPosts = lazy(() => import("@/page/posts/my-posts"));
+const EditPost = lazy(() => import("@/page/posts/edit-posts"));
+const UserProfilePage = lazy(() => import("@/page/user/user-profile"));
 
 const App = () => {
   const [collapsed, setCollapsed] = useState(false);
