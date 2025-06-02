@@ -1,5 +1,5 @@
 import { createApi, type BaseQueryFn } from "@reduxjs/toolkit/query/react";
-import { firebaseBaseQuery } from "../lib/firebaseBaseQuery";
+import { firebaseBaseQuery } from "@/utils/firebaseBaseQuery";
 
 export interface Post {
   id: string;

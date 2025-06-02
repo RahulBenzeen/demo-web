@@ -4,7 +4,7 @@ import { Heart } from "lucide-react"
 import { useToggleLikeMutation } from "../store/postApi"
 import { useAuth } from "../contexts/AuthContext"
 import { useToast } from "@/components/ui/use-toast"
-import { cn } from "../lib/utils"
+import { cn } from "../utils/utils"
 import { sendNotificationToUser } from "@/lib/notifications"
 
 interface LikeButtonProps {

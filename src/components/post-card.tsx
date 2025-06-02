@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Post } from "@/store/postApi"
 import { Calendar, MessageSquare, Eye } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn } from "@/utils/utils"
 import { useState, useMemo } from "react"
 import { LikeButton } from "@/components/like-button"
 

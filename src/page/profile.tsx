@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar } from "@/components/ui/avatar"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/components/ui/use-toast"
 import { Loader2, LogOut } from "lucide-react"
@@ -115,14 +115,14 @@ export default function Profile() {
                 <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded-full">
                   <Loader2 className="h-8 w-8 animate-spin" />
                 </div>
-              ) : (
+              ) : ( */}
                 <>
                   <AvatarImage src={userProfile.photoURL || ""} />
                   <AvatarFallback className="text-2xl">
                     {userProfile.displayName?.charAt(0) || userProfile.email?.charAt(0) || "U"}
                   </AvatarFallback>
                 </>
-              )} */}
+              {/* // )} */}
               {/* <div className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-2">
                 <Camera className="h-4 w-4" />
               </div> */}

@@ -1,5 +1,5 @@
 // src/components/ui/loading-spinner.tsx
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 
 export const LoadingSpinner = ({ 
   className, 

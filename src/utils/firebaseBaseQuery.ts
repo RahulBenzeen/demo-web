@@ -17,7 +17,7 @@ import {
   arrayRemove,
   setDoc,
 } from "firebase/firestore"
-import { auth, db } from "./firebase"
+import { auth, db } from "@/lib/firebase"
 import type { BaseQueryFn } from "@reduxjs/toolkit/query"
 import type { Post } from "@/store/postApi"
 

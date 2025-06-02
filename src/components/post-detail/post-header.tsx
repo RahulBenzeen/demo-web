@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Share2, Bookmark, Edit } from 'lucide-react'
 import { LikeButton } from '@/components/like-button'
-import { cn } from '@/lib/utils'
+import { cn } from '@/utils/utils'
 import type { Post } from '@/store/postApi'
 
 interface PostHeaderProps {

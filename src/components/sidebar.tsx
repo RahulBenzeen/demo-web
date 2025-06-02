@@ -3,7 +3,7 @@
 import { Link, useLocation } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "./mode-toggle"
-import { cn } from "@/lib/utils"
+import { cn } from "@/utils/utils"
 import {
   ChevronLeft,
   ChevronRight,

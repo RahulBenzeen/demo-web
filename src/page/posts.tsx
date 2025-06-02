@@ -7,8 +7,8 @@ import {
 import type { Post } from "@/store/postApi";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useInfiniteScroll } from "@/lib/useInfiniteScroll";
-import { useDebounce } from "@/lib/useDebounce";
+import { useInfiniteScroll } from "@/utils/useInfiniteScroll";
+import { useDebounce } from "@/utils/useDebounce";
 import { FilterSidebar } from "@/components/posts/filter-sidebar";
 import { PostsHeader } from "@/components/posts/post-header";
 import { ActiveFilters } from "@/components/posts/active-filters";
@@ -32,7 +32,7 @@ export default function PostsPage() {
 
   // Base query parameters for fetching posts
   const baseQueryParams = useMemo(() => ({
-    limit: 10,
+    limit: 9,
     category: selectedCategories.length === 1 ? selectedCategories[0] : undefined,
     tags: selectedTags.length > 0 ? selectedTags : undefined,
   }), [selectedCategories, selectedTags]);

@@ -3,7 +3,7 @@ import { getAuth, GoogleAuthProvider } from "firebase/auth"
 import { getFirestore } from "firebase/firestore"
 import { getStorage } from "firebase/storage"
 import { getMessaging } from "firebase/messaging"; // Add this
-import { FIREBASE_CONFIG } from "./firebaseInstance";
+import { FIREBASE_CONFIG } from "../utils/firebaseInstance";
 
 
 // Initialize Firebase
