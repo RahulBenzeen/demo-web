@@ -17,9 +17,9 @@ export default function SavedPosts() {
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
         <div>
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             className="mb-4 text-muted-foreground hover:text-primary"
             onClick={() => navigate(-1)}
           >
@@ -38,9 +38,9 @@ export default function SavedPosts() {
             </div>
           </div>
         </div>
-        
-        <Button 
-          variant="outline" 
+
+        <Button
+          variant="outline"
           className="gap-2"
           onClick={() => navigate("/")}
         >
@@ -105,7 +105,7 @@ export default function SavedPosts() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {posts?.map((post) => (
-            <Card 
+            <Card
               key={post.id}
               className="h-full overflow-hidden transition-all hover:shadow-md cursor-pointer"
               onClick={() => navigate(`/${post.id}`)}
@@ -123,7 +123,7 @@ export default function SavedPosts() {
                   <BookOpen className="h-12 w-12 text-muted-foreground" />
                 </div>
               )}
-              
+
               <CardHeader>
                 <div className="flex justify-between items-start gap-2">
                   <CardTitle className="line-clamp-2 text-lg">{post.title}</CardTitle>
@@ -132,12 +132,12 @@ export default function SavedPosts() {
                   </Badge>
                 </div>
               </CardHeader>
-              
+
               <CardContent className="pb-4">
                 <p className="text-muted-foreground line-clamp-3 mb-4">
                   {post.excerpt || "No description available"}
                 </p>
-                
+
                 <div className="flex flex-wrap gap-2">
                   {post.tags?.slice(0, 3).map((tag, index) => (
                     <Badge key={index} variant="outline" className="text-xs">
@@ -150,7 +150,7 @@ export default function SavedPosts() {
                     </Badge>
                   )}
                 </div>
-                
+
                 <div className="flex items-center justify-between mt-4 text-sm text-muted-foreground">
                   <span>
                     {post.createdAt ? new Date(post.createdAt).toLocaleDateString() : "N/A"}

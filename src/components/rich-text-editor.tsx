@@ -1,9 +1,4 @@
-import React, {
-  useRef,
-  useState,
-  useCallback,
-  useEffect,
-} from 'react';
+import React, { useRef, useState, useCallback, useEffect } from 'react';
 import {
   Tooltip,
   TooltipTrigger,
@@ -39,6 +34,7 @@ interface RichTextEditorProps {
   className?: string;
   error?: string;
   height?: string;
+  maxHeight?: string;
 }
 
 interface Command {
@@ -46,6 +42,7 @@ interface Command {
   title: string;
   command: string;
   value?: string;
+  shortcut?: string;
 }
 
 export function RichTextEditor({
@@ -53,7 +50,8 @@ export function RichTextEditor({
   onChange,
   placeholder = 'Write something amazing...',
   className,
-  height = '400px',
+  height = '300px',
+  maxHeight,
 }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const [undoStack, setUndoStack] = useState<string[]>([]);
@@ -61,9 +59,29 @@ export function RichTextEditor({
   const [activeCommands, setActiveCommands] = useState<Record<string, boolean | string>>({});
   const [isPlaceholderVisible, setIsPlaceholderVisible] = useState(!value);
 
+  // Common icon styling
+  const commonIconClass = 'h-4 w-4';
+
+  // Command definitions with keyboard shortcuts
+  const commands: Command[] = [
+    { icon: <Bold className={commonIconClass} />, title: 'Bold', command: 'bold', shortcut: 'Ctrl+B' },
+    { icon: <Italic className={commonIconClass} />, title: 'Italic', command: 'italic', shortcut: 'Ctrl+I' },
+    { icon: <Underline className={commonIconClass} />, title: 'Underline', command: 'underline', shortcut: 'Ctrl+U' },
+    { icon: <Strikethrough className={commonIconClass} />, title: 'Strikethrough', command: 'strikeThrough' },
+    { icon: <Heading1 className={commonIconClass} />, title: 'Heading 1', command: 'formatBlock', value: 'h1' },
+    { icon: <Heading2 className={commonIconClass} />, title: 'Heading 2', command: 'formatBlock', value: 'h2' },
+    { icon: <List className={commonIconClass} />, title: 'Bullet List', command: 'insertUnorderedList' },
+    { icon: <ListOrdered className={commonIconClass} />, title: 'Numbered List', command: 'insertOrderedList' },
+    { icon: <AlignLeft className={commonIconClass} />, title: 'Align Left', command: 'justifyLeft' },
+    { icon: <AlignCenter className={commonIconClass} />, title: 'Align Center', command: 'justifyCenter' },
+    { icon: <AlignRight className={commonIconClass} />, title: 'Align Right', command: 'justifyRight' },
+    { icon: <Quote className={commonIconClass} />, title: 'Quote', command: 'formatBlock', value: 'blockquote' },
+    { icon: <Code className={commonIconClass} />, title: 'Code Block', command: 'formatBlock', value: 'pre' },
+  ];
+
   // Initialize editor content
   useEffect(() => {
-    if (editorRef.current && !editorRef.current.innerHTML && value) {
+    if (editorRef.current && value && !editorRef.current.innerHTML) {
       editorRef.current.innerHTML = value;
     }
   }, [value]);
@@ -85,7 +103,7 @@ export function RichTextEditor({
     }
   }, []);
 
-  // Handle command execution
+  // Handle command execution with improved list handling
   const handleCommand = useCallback(
     (command: string, value?: string) => {
       if (!editorRef.current) return;
@@ -94,14 +112,31 @@ export function RichTextEditor({
       saveState();
       
       try {
-        // Special handling for formatBlock commands
-        if (command === 'formatBlock' && value) {
+        if (command === 'insertUnorderedList' || command === 'insertOrderedList') {
+          // Ensure we're in a paragraph before inserting a list
+          const selection = window.getSelection();
+          if (selection && selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            const parentElement = range.commonAncestorContainer.parentElement;
+            
+            // If not in a paragraph or list item, wrap in paragraph first
+            if (parentElement && !['P', 'LI'].includes(parentElement.tagName)) {
+              document.execCommand('formatBlock', false, 'p');
+            }
+          }
+          document.execCommand(command, false);
+        } else if (command === 'formatBlock' && value) {
           document.execCommand('formatBlock', false, `<${value}>`);
         } else {
-          document.execCommand(command, false, undefined);
+          document.execCommand(command, false, value);
         }
         
-        updateContent();
+        // Force update content after list operations
+        if (command === 'insertUnorderedList' || command === 'insertOrderedList') {
+          setTimeout(updateContent, 0);
+        } else {
+          updateContent();
+        }
       } catch (error) {
         console.error(`Failed to execute command: ${command}`, error);
       }
@@ -115,7 +150,7 @@ export function RichTextEditor({
     
     const selection = window.getSelection();
     if (!selection || selection.toString().trim() === '') {
-      alert('Please select text to link');
+      alert('Please select text to create a link');
       return;
     }
 
@@ -127,31 +162,25 @@ export function RichTextEditor({
     }
   }, [saveState, updateContent]);
 
-  // Undo/Redo functionality
+  // Handle undo/redo
   const handleUndo = useCallback(() => {
-    if (undoStack.length === 0) return;
+    if (undoStack.length === 0 || !editorRef.current) return;
     
     const previousState = undoStack[undoStack.length - 1];
     setUndoStack(prev => prev.slice(0, -1));
-    
-    if (editorRef.current) {
-      setRedoStack(prev => [...prev, editorRef.current!.innerHTML]);
-      editorRef.current.innerHTML = previousState;
-      updateContent();
-    }
+    setRedoStack(prev => [...prev, editorRef.current!.innerHTML]);
+    editorRef.current.innerHTML = previousState;
+    updateContent();
   }, [undoStack, updateContent]);
 
   const handleRedo = useCallback(() => {
-    if (redoStack.length === 0) return;
+    if (redoStack.length === 0 || !editorRef.current) return;
     
     const nextState = redoStack[redoStack.length - 1];
     setRedoStack(prev => prev.slice(0, -1));
-    
-    if (editorRef.current) {
-      setUndoStack(prev => [...prev, editorRef.current!.innerHTML]);
-      editorRef.current.innerHTML = nextState;
-      updateContent();
-    }
+    setUndoStack(prev => [...prev, editorRef.current!.innerHTML]);
+    editorRef.current.innerHTML = nextState;
+    updateContent();
   }, [redoStack, updateContent]);
 
   // Track active formatting commands
@@ -171,16 +200,20 @@ export function RichTextEditor({
       newActiveCommands.insertUnorderedList = document.queryCommandState('insertUnorderedList');
       newActiveCommands.insertOrderedList = document.queryCommandState('insertOrderedList');
       
+      // Check alignment
+      newActiveCommands.justifyLeft = document.queryCommandState('justifyLeft');
+      newActiveCommands.justifyCenter = document.queryCommandState('justifyCenter');
+      newActiveCommands.justifyRight = document.queryCommandState('justifyRight');
+      
       // Check block formats
       const blockFormat = document.queryCommandValue('formatBlock').toLowerCase();
       if (blockFormat) {
-        newActiveCommands.formatBlock = blockFormat;
+        newActiveCommands.formatBlock = blockFormat.replace(/^<|>$/g, '');
       }
       
       setActiveCommands(newActiveCommands);
     };
     
-    // Set up event listeners
     const editor = editorRef.current;
     if (editor) {
       editor.addEventListener('input', updateActiveCommands);
@@ -189,7 +222,6 @@ export function RichTextEditor({
       editor.addEventListener('blur', updateActiveCommands);
     }
     
-    // Initial update
     updateActiveCommands();
     
     return () => {
@@ -202,51 +234,68 @@ export function RichTextEditor({
     };
   }, []);
 
+  // Handle keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!editorRef.current) return;
+      
+      // Handle common keyboard shortcuts
+      if (e.ctrlKey || e.metaKey) {
+        switch (e.key.toLowerCase()) {
+          case 'b':
+            e.preventDefault();
+            handleCommand('bold');
+            break;
+          case 'i':
+            e.preventDefault();
+            handleCommand('italic');
+            break;
+          case 'u':
+            e.preventDefault();
+            handleCommand('underline');
+            break;
+          case 'k':
+            e.preventDefault();
+            handleLink();
+            break;
+          case 'z':
+            e.preventDefault();
+            if (e.shiftKey) {
+              handleRedo();
+            } else {
+              handleUndo();
+            }
+            break;
+        }
+      }
+    };
+    
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [handleCommand, handleLink, handleUndo, handleRedo]);
+
   // Handle editor input
   const handleInput = useCallback(() => {
     updateContent();
   }, [updateContent]);
 
-  // Common icon styling
-  const commonIconClass = 'h-4 w-4';
-
-  // Command definitions
-  const commands: Command[] = [
-    { icon: <Bold className={commonIconClass} />, title: 'Bold', command: 'bold' },
-    { icon: <Italic className={commonIconClass} />, title: 'Italic', command: 'italic' },
-    { icon: <Underline className={commonIconClass} />, title: 'Underline', command: 'underline' },
-    { icon: <Strikethrough className={commonIconClass} />, title: 'Strikethrough', command: 'strikeThrough' },
-    { icon: <Heading1 className={commonIconClass} />, title: 'Heading 1', command: 'formatBlock', value: 'h1' },
-    { icon: <Heading2 className={commonIconClass} />, title: 'Heading 2', command: 'formatBlock', value: 'h2' },
-    { icon: <List className={commonIconClass} />, title: 'Bullet List', command: 'insertUnorderedList' },
-    { icon: <ListOrdered className={commonIconClass} />, title: 'Numbered List', command: 'insertOrderedList' },
-    { icon: <AlignLeft className={commonIconClass} />, title: 'Align Left', command: 'justifyLeft' },
-    { icon: <AlignCenter className={commonIconClass} />, title: 'Align Center', command: 'justifyCenter' },
-    { icon: <AlignRight className={commonIconClass} />, title: 'Align Right', command: 'justifyRight' },
-    { icon: <Quote className={commonIconClass} />, title: 'Quote', command: 'formatBlock', value: 'blockquote' },
-    { icon: <Code className={commonIconClass} />, title: 'Code Block', command: 'formatBlock', value: 'pre' },
-  ];
-
   // Determine if a command is active
   const isCommandActive = (command: string, value?: string): boolean => {
-    // Handle block-level commands
     if (command === 'formatBlock' && value) {
       return activeCommands.formatBlock === value.toLowerCase();
     }
     
-    // Handle list commands
     if (command === 'insertUnorderedList' || command === 'insertOrderedList') {
       return !!activeCommands[command];
     }
     
-    // Handle inline styles
     return !!activeCommands[command];
   };
 
   return (
-    <div className={cn('rounded-lg border bg-card overflow-hidden', className)}>
-      <div className="flex flex-wrap gap-1 border-b bg-muted/50 p-1">
-        <TooltipProvider delayDuration={0}>
+    <div className={cn('rounded-lg border bg-card overflow-hidden flex flex-col', className)}>
+      <div className="flex flex-wrap gap-1 border-b bg-muted/50 p-1 sticky top-0 z-10">
+        <TooltipProvider delayDuration={300}>
           {commands.map((cmd, i) => (
             <Tooltip key={i}>
               <TooltipTrigger asChild>
@@ -256,7 +305,7 @@ export function RichTextEditor({
                   variant="ghost"
                   size="sm"
                   className={cn(
-                    "h-8 w-8 p-0",
+                    "h-8 w-8 p-0 transition-colors",
                     isCommandActive(cmd.command, cmd.value) && "bg-accent text-accent-foreground"
                   )}
                   onClick={() => handleCommand(cmd.command, cmd.value)}
@@ -264,13 +313,15 @@ export function RichTextEditor({
                   {cmd.icon}
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>
-                <p className="text-xs">{cmd.title}</p>
+              <TooltipContent side="bottom">
+                <p className="text-xs">
+                  {cmd.title}
+                  {cmd.shortcut && <span className="ml-2 opacity-70">{cmd.shortcut}</span>}
+                </p>
               </TooltipContent>
             </Tooltip>
           ))}
 
-          {/* Link Button */}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -278,20 +329,22 @@ export function RichTextEditor({
                 aria-label="Insert Link"
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0"
+                className="h-8 w-8 p-0 transition-colors"
                 onClick={handleLink}
               >
                 <Link2 className={commonIconClass} />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>
-              <p className="text-xs">Insert Link</p>
+            <TooltipContent side="bottom">
+              <p className="text-xs">
+                Insert Link
+                <span className="ml-2 opacity-70">Ctrl+K</span>
+              </p>
             </TooltipContent>
           </Tooltip>
 
           <div className="mx-2 my-1 w-px bg-border" />
 
-          {/* Undo Button */}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -299,19 +352,21 @@ export function RichTextEditor({
                 aria-label="Undo"
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0"
+                className={cn(
+                  "h-8 w-8 p-0 transition-colors",
+                  undoStack.length === 0 && "opacity-50 cursor-not-allowed"
+                )}
                 onClick={handleUndo}
                 disabled={undoStack.length === 0}
               >
                 <Undo className={commonIconClass} />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>
-              <p className="text-xs">Undo</p>
+            <TooltipContent side="bottom">
+              <p className="text-xs">Undo <span className="ml-2 opacity-70">Ctrl+Z</span></p>
             </TooltipContent>
           </Tooltip>
 
-          {/* Redo Button */}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -319,21 +374,31 @@ export function RichTextEditor({
                 aria-label="Redo"
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0"
+                className={cn(
+                  "h-8 w-8 p-0 transition-colors",
+                  redoStack.length === 0 && "opacity-50 cursor-not-allowed"
+                )}
                 onClick={handleRedo}
                 disabled={redoStack.length === 0}
               >
                 <Redo className={commonIconClass} />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>
-              <p className="text-xs">Redo</p>
+            <TooltipContent side="bottom">
+              <p className="text-xs">Redo <span className="ml-2 opacity-70">Ctrl+Shift+Z</span></p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
       </div>
 
-      <div className="relative" style={{ height }}>
+      <div 
+        className="relative" 
+        style={{ 
+          height, 
+          maxHeight: maxHeight || 'none',
+          overflow: 'auto'
+        }}
+      >
         <div
           ref={editorRef}
           role="textbox"
@@ -341,18 +406,23 @@ export function RichTextEditor({
           contentEditable
           suppressContentEditableWarning
           className={cn(
-            'prose dark:prose-invert max-w-none p-4 focus:outline-none',
-            'min-h-full overflow-auto editor-content',
+            'prose prose-sm sm:prose-base lg:prose-lg dark:prose-invert max-w-none p-4 focus:outline-none',
+            'w-full h-full overflow-auto editor-content',
             'flex flex-col',
             '[&>h1]:text-3xl [&>h1]:font-bold [&>h1]:my-2',
             '[&>h2]:text-2xl [&>h2]:font-bold [&>h2]:my-2',
             '[&>p]:my-1',
-            '[&>ul]:list-disc [&>ul]:pl-6',
-            '[&>ol]:list-decimal [&>ol]:pl-6',
-            '[&>blockquote]:border-l-4 [&>blockquote]:pl-4 [&>blockquote]:italic',
-            '[&>pre]:bg-gray-100 [&>pre]:dark:bg-gray-800 [&>pre]:p-2 [&>pre]:rounded'
+            '[&>ul]:list-disc [&>ul]:pl-6 [&>ul]:my-2',
+            '[&>ol]:list-decimal [&>ol]:pl-6 [&>ol]:my-2',
+            '[&>ul>li]:ml-4 [&>ul>li]:pl-2',
+            '[&>ol>li]:ml-4 [&>ol>li]:pl-2',
+            '[&>blockquote]:border-l-4 [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:border-muted-foreground/40',
+            '[&>pre]:bg-muted [&>pre]:p-2 [&>pre]:rounded [&>pre]:my-2 [&>pre]:overflow-x-auto',
+            '[&>a]:text-blue-600 [&>a]:underline [&>a:hover]:text-blue-800',
+            '[&_a]:text-blue-600 [&_a]:underline [&_a:hover]:text-blue-800'
           )}
           onInput={handleInput}
+          data-placeholder={placeholder}
         />
         
         {isPlaceholderVisible && (

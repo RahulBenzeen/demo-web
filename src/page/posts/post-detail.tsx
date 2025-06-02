@@ -380,7 +380,7 @@ export default function PostDetail() {
           <h2 className="text-2xl font-bold text-gradient">
             Comments ({comments.length})
           </h2>
-          
+
           <CommentsList
             comments={comments}
             isLoading={isCommentsLoading}

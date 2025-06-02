@@ -40,7 +40,7 @@ const App = () => {
             <Router>
               <div className="flex h-screen overflow-hidden bg-background">
                 <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
-                
+
                 {/* MAIN CONTENT AREA - PRESERVED ORIGINAL STRUCTURE */}
                 <main className="flex-1 overflow-auto">
                   <div className="container mx-auto p-4 md:p-6">
@@ -52,63 +52,63 @@ const App = () => {
                       <Routes>
                         <Route path="/" element={<PostsPage />} />
                         <Route path="/:id" element={<PostDetail />} />
-                        <Route 
-                          path="/create-post" 
+                        <Route
+                          path="/create-post"
                           element={
                             <ProtectedRoute>
                               <CreatePost />
                             </ProtectedRoute>
-                          } 
+                          }
                         />
-                        <Route 
-                          path="/edit-post/:id" 
+                        <Route
+                          path="/edit-post/:id"
                           element={
                             <ProtectedRoute>
                               <EditPost />
                             </ProtectedRoute>
-                          } 
+                          }
                         />
-                        <Route 
-                          path="/my-posts" 
+                        <Route
+                          path="/my-posts"
                           element={
                             <ProtectedRoute>
                               <MyPosts />
                             </ProtectedRoute>
-                          } 
+                          }
                         />
                         <Route path="/contact" element={<Contact />} />
                         <Route path="/user/:userId" element={<UserProfilePage />} />
-                        <Route 
-                          path="/dashboard" 
+                        <Route
+                          path="/dashboard"
                           element={
                             <ProtectedRoute adminOnly>
                               <Dashboard />
                             </ProtectedRoute>
-                          } 
+                          }
                         />
-                        <Route 
-                          path="/settings" 
+                        <Route
+                          path="/settings"
                           element={
                             <ProtectedRoute>
                               <Settings />
                             </ProtectedRoute>
-                          } 
+                          }
                         />
-                        <Route 
-                          path="/profile" 
+                        <Route
+                          path="/profile"
                           element={
                             <ProtectedRoute>
                               <Profile />
                             </ProtectedRoute>
-                          } 
+                          }
                         />
-                        <Route 
-                          path="/saved" 
+                        <Route
+                          path="/saved"
                           element={
                             <ProtectedRoute>
                               <SavedPosts />
                             </ProtectedRoute>
-                          } 
+                          }
                         />
                         <Route path="/sign-in" element={<SignIn />} />
                         <Route path="/sign-up" element={<SignUp />} />

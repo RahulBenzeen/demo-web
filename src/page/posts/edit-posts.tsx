@@ -150,7 +150,7 @@ export default function EditPost() {
         title: "Image uploaded",
         description: "Cover image has been uploaded successfully",
       })
-    } catch  {
+    } catch {
       toast({
         title: "Upload failed",
         description: "Failed to upload image. Please try again.",

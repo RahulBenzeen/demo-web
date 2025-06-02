@@ -1,10 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect } from "react";
-import {
-  useGetPostsQuery,
-  useSearchPostsQuery,
-  useGetCategoriesQuery,
-} from "@/store/postApi";
-
+import { useGetPostsQuery, useSearchPostsQuery, useGetCategoriesQuery, } from "@/store/postApi";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInfiniteScroll } from "@/utils/useInfiniteScroll";

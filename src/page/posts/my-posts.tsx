@@ -89,7 +89,7 @@ export default function MyPosts() {
         description: "Your post has been deleted successfully",
       })
       refetch()
-    } catch{
+    } catch {
       toast({
         title: "Error",
         description: "Failed to delete post. Please try again.",

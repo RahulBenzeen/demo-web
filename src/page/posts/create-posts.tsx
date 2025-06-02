@@ -20,7 +20,7 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore"
 import { sendNotificationToUser } from "@/lib/notifications"
 import { useGetCategoriesQuery } from "@/store/postApi"
 
-import { uploadImage} from "@/lib/cloudinary"
+import { uploadImage } from "@/lib/cloudinary"
 
 export default function CreatePost() {
   const [title, setTitle] = useState("")
@@ -176,25 +176,25 @@ export default function CreatePost() {
   //     // Sanitize filename
   //     const fileName = sanitizeFileName(`${Date.now()}-${file.name}`)
   //     const storageRef = ref(storage, `posts/covers/${fileName}`)
-      
+
   //     // Upload with metadata
   //     await uploadBytes(storageRef, file, {
   //       contentType: file.type,
   //       cacheControl: "public, max-age=31536000" // 1 year cache
   //     })
-      
+
   //     const imageUrl = await getDownloadURL(storageRef)
   //     setCoverImage(imageUrl)
-      
+
   //     toast({
   //       title: "Image uploaded",
   //       description: "Cover image has been uploaded successfully",
   //     })
   //   } catch (error) {
   //     console.error("Upload error:", error)
-      
+
   //     let errorMessage = "Failed to upload image. Please try again."
-      
+
   //     // Handle specific errors
   //     if (error instanceof FirebaseError) {
   //       switch (error.code) {
@@ -267,31 +267,31 @@ export default function CreatePost() {
     }
   }
 
-const removeCoverImage = async () => {
-  // if (coverImage) {
-  //   const publicId = getPublicId(coverImage)
-  //   if (publicId) {
-  //     try {
-  //       await deleteImage(publicId)
-  //       toast({
-  //         title: "Image removed",
-  //         description: "Cover image deleted from Cloudinary",
-  //       })
-  //     } catch (error) {
-  //       toast({
-  //         title: "Delete failed",
-  //         description: (error as Error).message || "Failed to delete image.",
-  //         variant: "destructive",
-  //       })
-  //     }
-  //   }
-  // }
+  const removeCoverImage = async () => {
+    // if (coverImage) {
+    //   const publicId = getPublicId(coverImage)
+    //   if (publicId) {
+    //     try {
+    //       await deleteImage(publicId)
+    //       toast({
+    //         title: "Image removed",
+    //         description: "Cover image deleted from Cloudinary",
+    //       })
+    //     } catch (error) {
+    //       toast({
+    //         title: "Delete failed",
+    //         description: (error as Error).message || "Failed to delete image.",
+    //         variant: "destructive",
+    //       })
+    //     }
+    //   }
+    // }
 
-  setCoverImage("")
-  if (fileInputRef.current) {
-    fileInputRef.current.value = ""
+    setCoverImage("")
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
   }
-}
 
   return (
     <div className="container mx-auto px-4 py-8">
