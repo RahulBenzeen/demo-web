@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback, useEffect } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import {
   Tooltip,
   TooltipTrigger,
@@ -25,25 +25,8 @@ import {
   Quote,
   Strikethrough,
 } from 'lucide-react';
+import { Command, RichTextEditorProps } from '@/utils/types/interfaces';
 
-interface RichTextEditorProps {
-  value: string;
-  onChange: (value: string) => void;
-  label?: string;
-  placeholder?: string;
-  className?: string;
-  error?: string;
-  height?: string;
-  maxHeight?: string;
-}
-
-interface Command {
-  icon: React.ReactNode;
-  title: string;
-  command: string;
-  value?: string;
-  shortcut?: string;
-}
 
 export function RichTextEditor({
   value,
@@ -89,7 +72,7 @@ export function RichTextEditor({
   // Update content and track state
   const updateContent = useCallback(() => {
     if (!editorRef.current) return;
-    
+
     const content = editorRef.current.innerHTML;
     onChange(content);
     setIsPlaceholderVisible(!content || content === '<br>' || content === '');
@@ -107,10 +90,10 @@ export function RichTextEditor({
   const handleCommand = useCallback(
     (command: string, value?: string) => {
       if (!editorRef.current) return;
-      
+
       editorRef.current.focus();
       saveState();
-      
+
       try {
         if (command === 'insertUnorderedList' || command === 'insertOrderedList') {
           // Ensure we're in a paragraph before inserting a list
@@ -118,7 +101,7 @@ export function RichTextEditor({
           if (selection && selection.rangeCount > 0) {
             const range = selection.getRangeAt(0);
             const parentElement = range.commonAncestorContainer.parentElement;
-            
+
             // If not in a paragraph or list item, wrap in paragraph first
             if (parentElement && !['P', 'LI'].includes(parentElement.tagName)) {
               document.execCommand('formatBlock', false, 'p');
@@ -130,7 +113,7 @@ export function RichTextEditor({
         } else {
           document.execCommand(command, false, value);
         }
-        
+
         // Force update content after list operations
         if (command === 'insertUnorderedList' || command === 'insertOrderedList') {
           setTimeout(updateContent, 0);
@@ -147,7 +130,7 @@ export function RichTextEditor({
   // Handle link insertion
   const handleLink = useCallback(() => {
     if (!editorRef.current) return;
-    
+
     const selection = window.getSelection();
     if (!selection || selection.toString().trim() === '') {
       alert('Please select text to create a link');
@@ -165,7 +148,7 @@ export function RichTextEditor({
   // Handle undo/redo
   const handleUndo = useCallback(() => {
     if (undoStack.length === 0 || !editorRef.current) return;
-    
+
     const previousState = undoStack[undoStack.length - 1];
     setUndoStack(prev => prev.slice(0, -1));
     setRedoStack(prev => [...prev, editorRef.current!.innerHTML]);
@@ -175,7 +158,7 @@ export function RichTextEditor({
 
   const handleRedo = useCallback(() => {
     if (redoStack.length === 0 || !editorRef.current) return;
-    
+
     const nextState = redoStack[redoStack.length - 1];
     setRedoStack(prev => prev.slice(0, -1));
     setUndoStack(prev => [...prev, editorRef.current!.innerHTML]);
@@ -187,33 +170,33 @@ export function RichTextEditor({
   useEffect(() => {
     const updateActiveCommands = () => {
       if (!editorRef.current) return;
-      
+
       const newActiveCommands: Record<string, boolean | string> = {};
-      
+
       // Check inline styles
       newActiveCommands.bold = document.queryCommandState('bold');
       newActiveCommands.italic = document.queryCommandState('italic');
       newActiveCommands.underline = document.queryCommandState('underline');
       newActiveCommands.strikeThrough = document.queryCommandState('strikeThrough');
-      
+
       // Check list states
       newActiveCommands.insertUnorderedList = document.queryCommandState('insertUnorderedList');
       newActiveCommands.insertOrderedList = document.queryCommandState('insertOrderedList');
-      
+
       // Check alignment
       newActiveCommands.justifyLeft = document.queryCommandState('justifyLeft');
       newActiveCommands.justifyCenter = document.queryCommandState('justifyCenter');
       newActiveCommands.justifyRight = document.queryCommandState('justifyRight');
-      
+
       // Check block formats
       const blockFormat = document.queryCommandValue('formatBlock').toLowerCase();
       if (blockFormat) {
         newActiveCommands.formatBlock = blockFormat.replace(/^<|>$/g, '');
       }
-      
+
       setActiveCommands(newActiveCommands);
     };
-    
+
     const editor = editorRef.current;
     if (editor) {
       editor.addEventListener('input', updateActiveCommands);
@@ -221,9 +204,9 @@ export function RichTextEditor({
       editor.addEventListener('keyup', updateActiveCommands);
       editor.addEventListener('blur', updateActiveCommands);
     }
-    
+
     updateActiveCommands();
-    
+
     return () => {
       if (editor) {
         editor.removeEventListener('input', updateActiveCommands);
@@ -238,7 +221,7 @@ export function RichTextEditor({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!editorRef.current) return;
-      
+
       // Handle common keyboard shortcuts
       if (e.ctrlKey || e.metaKey) {
         switch (e.key.toLowerCase()) {
@@ -269,7 +252,7 @@ export function RichTextEditor({
         }
       }
     };
-    
+
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [handleCommand, handleLink, handleUndo, handleRedo]);
@@ -284,11 +267,11 @@ export function RichTextEditor({
     if (command === 'formatBlock' && value) {
       return activeCommands.formatBlock === value.toLowerCase();
     }
-    
+
     if (command === 'insertUnorderedList' || command === 'insertOrderedList') {
       return !!activeCommands[command];
     }
-    
+
     return !!activeCommands[command];
   };
 
@@ -391,10 +374,10 @@ export function RichTextEditor({
         </TooltipProvider>
       </div>
 
-      <div 
-        className="relative" 
-        style={{ 
-          height, 
+      <div
+        className="relative"
+        style={{
+          height,
           maxHeight: maxHeight || 'none',
           overflow: 'auto'
         }}
@@ -424,7 +407,7 @@ export function RichTextEditor({
           onInput={handleInput}
           data-placeholder={placeholder}
         />
-        
+
         {isPlaceholderVisible && (
           <div className="absolute top-4 left-4 text-muted-foreground pointer-events-none">
             {placeholder}

@@ -66,7 +66,7 @@ export function LikeButton({
         );
       }
     } catch (error: unknown) {
-      console.error("Failed to toggle like:", error)
+     
       toast({
         title: "Error",
         description:

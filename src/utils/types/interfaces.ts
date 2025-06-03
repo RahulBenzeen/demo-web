@@ -80,3 +80,23 @@ export interface FirebaseQueryArgs {
   params?: Record<string, any>
   id?: string
 }
+
+
+export interface RichTextEditorProps {
+  value: string;
+  onChange: (value: string) => void;
+  label?: string;
+  placeholder?: string;
+  className?: string;
+  error?: string;
+  height?: string;
+  maxHeight?: string;
+}
+
+export interface Command {
+  icon: React.ReactNode;
+  title: string;
+  command: string;
+  value?: string;
+  shortcut?: string;
+}

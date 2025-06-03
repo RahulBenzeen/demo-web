@@ -1,8 +1,13 @@
 import { createApi, type BaseQueryFn } from "@reduxjs/toolkit/query/react";
 import { firebaseBaseQuery } from "@/utils/firebaseBaseQuery";
-import { PostsResponse,Category, Comment, Post, Reply, User  } from "@/utils/types/interfaces";
-
-
+import {
+  PostsResponse,
+  Category,
+  Comment,
+  Post,
+  Reply,
+  User,
+} from "@/utils/types/interfaces";
 
 function serializeTimestamps(obj: Record<string, any>): Record<string, any> {
   const copy = { ...obj };
@@ -92,9 +97,9 @@ export const postsAPI = createApi({
       providesTags: (result) =>
         result
           ? [
-            ...result.posts.map(({ id }) => ({ type: "Post" as const, id })),
-            { type: "Post", id: "LIST" },
-          ]
+              ...result.posts.map(({ id }) => ({ type: "Post" as const, id })),
+              { type: "Post", id: "LIST" },
+            ]
           : [{ type: "Post", id: "LIST" }],
       transformResponse: (response: any): PostsResponse => ({
         posts: response.posts.map(
@@ -221,9 +226,9 @@ export const postsAPI = createApi({
       providesTags: (result, error, postId) =>
         result
           ? [
-            ...result.map(({ id }) => ({ type: "Comment" as const, id })),
-            { type: "Comment", id: "LIST" },
-          ]
+              ...result.map(({ id }) => ({ type: "Comment" as const, id })),
+              { type: "Comment", id: "LIST" },
+            ]
           : [{ type: "Comment", id: "LIST" }],
     }),
 
@@ -431,9 +436,9 @@ export const postsAPI = createApi({
       providesTags: (result) =>
         result
           ? [
-            ...result.map(({ id }) => ({ type: "Post" as const, id })),
-            { type: "Post", id: "LIST" },
-          ]
+              ...result.map(({ id }) => ({ type: "Post" as const, id })),
+              { type: "Post", id: "LIST" },
+            ]
           : [{ type: "Post", id: "LIST" }],
     }),
 
@@ -463,24 +468,72 @@ export const postsAPI = createApi({
         url: `users/${userId}`,
         method: "GET",
       }),
-      providesTags: (result, error, userId) => [{ type: 'User', id: userId }],
+      providesTags: (result, error, userId) => [{ type: "User", id: userId }],
       transformResponse: (response: any) => ({
         uid: response.uid,
         displayName: response.displayName,
         email: response.email,
         photoURL: response.photoURL,
-        bio: response.bio || '',
-        location: response.location || '',
-        website: response.website || '',
-        username: response.username || '',
-        createdAt: response.createdAt?.toDate?.().toISOString?.() || new Date().toISOString(),
+        bio: response.bio || "",
+        location: response.location || "",
+        website: response.website || "",
+        username: response.username || "",
+        createdAt:
+          response.createdAt?.toDate?.().toISOString?.() ||
+          new Date().toISOString(),
         postCount: response.postCount || 0,
         followerCount: response.followerCount || 0,
         followingCount: response.followingCount || 0,
       }),
     }),
-  }),
 
+    getRelatedPosts: builder.query<
+      PostsResponse,
+      {
+        category: string;
+        excludeId: string;
+        limit: number;
+        startAfter?: string | null;
+      }
+    >({
+      query: ({ category, excludeId, limit, startAfter }) => ({
+        url: "posts",
+        method: "GET",
+        params: {
+          category,
+          excludeId,
+          limit,
+          startAfter: startAfter || undefined,
+        },
+      }),
+      serializeQueryArgs: ({ queryArgs }) => {
+        return `${queryArgs.category}-${queryArgs.excludeId}`;
+      },
+      merge: (currentCache, newItems) => {
+        if (currentCache?.lastDocId === newItems.lastDocId) return currentCache;
+
+        return {
+          posts: [...(currentCache?.posts || []), ...newItems.posts],
+          hasMore: newItems.hasMore,
+          lastDocId: newItems.lastDocId,
+        };
+      },
+      forceRefetch({ currentArg, previousArg }) {
+        return (
+          currentArg?.category !== previousArg?.category ||
+          currentArg?.excludeId !== previousArg?.excludeId ||
+          currentArg?.startAfter !== previousArg?.startAfter
+        );
+      },
+      transformResponse: (response: any): PostsResponse => {
+        return {
+          posts: response.posts.map(serializeTimestamps),
+          hasMore: response.hasMore,
+          lastDocId: response.lastDocId || null,
+        };
+      },
+    }),
+  }),
 });
 
 export const {
@@ -504,5 +557,6 @@ export const {
   useSavePostMutation,
   useUnsavePostMutation,
   useGetSavedPostsQuery,
-  useGetUserByIdQuery
+  useGetUserByIdQuery,
+  useGetRelatedPostsQuery,
 } = postsAPI;
