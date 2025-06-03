@@ -53,7 +53,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Skeleton } from "@/components/ui/skeleton"
-
+import Logo from '/logo.svg';
 interface Notification {
   id: string;
   title: string;
@@ -305,7 +305,7 @@ export function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
         )}
       >
         <div className="flex h-14 items-center justify-between border-b px-3 py-4">
-          {!collapsed && <h1 className="text-xl font-bold tracking-tight">B'log</h1>}
+          {!collapsed &&  <img src={Logo} alt="B'LOG Logo" className="h-12" />}
           {isDesktop && (
             <Button 
               variant="ghost" 

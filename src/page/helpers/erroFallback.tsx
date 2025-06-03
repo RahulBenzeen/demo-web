@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Home, RefreshCw } from "lucide-react";
-import { Link } from "react-router-dom";
+
 
 interface ErrorFallbackProps {
   error?: Error | null;
@@ -56,10 +56,10 @@ export function ErrorFallback({ error, onReset }: ErrorFallbackProps) {
             size="lg"
             className="flex-1 gap-2"
           >
-            <Link to="/">
+            <a href="/">
               <Home className="w-4 h-4" />
               Go Home
-            </Link>
+            </a>
           </Button>
         </div>
 
